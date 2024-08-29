@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, globalShortcut } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -13,6 +13,7 @@ function createWindow() {
     // show: false,
     frame: false, // 隐藏窗口的边框和标题栏
     autoHideMenuBar: true,
+    // transparent: true, // 设置窗口背景透明
     alwaysOnTop: false, //设置窗口不一直在最顶层
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
@@ -46,6 +47,15 @@ function createWindow() {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  //刷新
+  globalShortcut.register('F5', () => {
+    mainWindow.webContents.reload()
+  })
+
+  globalShortcut.register('CommandOrControl+R', () => {
+    mainWindow.webContents.reload()
+  })
 }
 
 app.whenReady().then(() => {

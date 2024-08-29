@@ -1,20 +1,27 @@
 <template>
   <div class="title-bar">
     <!-- @mousedown="titleBar" -->
-    <span>笔记盒子</span>
+    <span style="background: #2e2e2e; display: block">笔记</span>
     <div class="title-btn">
-      <button @click="minimize">_</button>
+      <button @click="minimize">—</button>
       <span>
-        <button v-if="maxState" @click="maximize(true)">口</button>
+        <button v-if="maxState" @click="maximize(true)">▭</button>
         <button v-else @click="maximize(false)">[&nbsp;&nbsp;]</button>
       </span>
       <button @click="close">X</button>
     </div>
   </div>
+  <leftMenu />
+  <leftList />
+  <maintext />
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import leftMenu from './components/leftMenu.vue'
+import leftList from './components/leftList.vue'
+import maintext from './components/mainText.vue'
+
 //判断最大化还是最小化
 let maxState = ref(true)
 
@@ -28,30 +35,26 @@ const maximize = (el) => {
 const close = () => {
   window.electron.ipcRenderer.send('close-window')
 }
-// 允许拖动窗口
-// const titleBar = () => {
-//   window.electron.ipcRenderer.send('drag-window')
-// }
 </script>
 <style>
-/* body {
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background-color: #f0f0f0;
-} */
+body {
+  background: transparent;
+  border: 1px solid #dedede;
+  border-radius: 5px;
+  overflow: hidden;
+}
 .title-bar {
+  border-top-right-radius: 5px;
   width: 100%;
-  background-color: #333;
-  color: white;
+  background-color: #f5f5f5;
+  color: #777;
   padding: 10px;
   display: flex;
   justify-content: space-between;
   /*  align-items: center; */
   cursor: default; /* 使鼠标指针看起来是默认状态 */
   -webkit-app-region: drag;
+  border-bottom: 1px solid #dedede;
 }
 .title-btn {
   -webkit-app-region: no-drag;
@@ -59,10 +62,10 @@ const close = () => {
 .title-bar button {
   background: none;
   border: none;
-  color: white;
+  color: #222;
   cursor: pointer;
-  font-size: 16px;
-  margin-left: 10px;
+  font-size: 14px;
+  margin-left: 8px;
 }
 .content {
   flex: 1;

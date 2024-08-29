@@ -5,7 +5,8 @@ body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background-image: url('./wavy-lines.svg');
+  /* background-image: url('./wavy-lines.svg');*/
+  background-color: #f5f5f5;
   background-size: cover;
   user-select: none;
 }
