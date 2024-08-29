@@ -26,15 +26,19 @@
 <script setup>
 import { ref } from 'vue'
 import { ElIcon } from 'element-plus'
+import { useStore } from '../store/index'
+
+const store = useStore()
 let iconList = [
-  { icon: 'CirclePlus', name: '新建笔记' },
-  { icon: 'Notebook', name: '全部笔记' }
+  { id: 'pcc01', icon: 'CirclePlus', name: '新建笔记' },
+  { id: 'pcc02', icon: 'Notebook', name: '全部笔记' }
 ]
 // 响应式变量来跟踪选中的图标索引
 const selectedIndex = ref(0)
 // 选择图标的函数
 const selectIcon = (index) => {
   selectedIndex.value = index
+  store.setSelectedIndex(index)
 }
 </script>
 
