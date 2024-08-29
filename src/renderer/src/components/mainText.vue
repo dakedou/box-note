@@ -5,7 +5,7 @@
         v-model="param.title"
         class="no-border"
         maxlength="20"
-        placeholder="输入标题"
+        placeholder="标题"
         show-word-limit
         type="text"
         size="large"
@@ -18,7 +18,7 @@
         v-model="param.textarea"
         maxlength="4000"
         class="textarea-style"
-        placeholder="输入内容"
+        placeholder="暂无内容"
         show-word-limit
         type="textarea"
         resize="none"

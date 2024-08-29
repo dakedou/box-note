@@ -7,10 +7,11 @@
         placeholder="搜索内容"
         size="default"
         class="input-with-select"
+        @change="searchBookList"
       >
       </el-input>
       <el-button type="success" size="default" class="search-btn">
-        <el-icon><Search /></el-icon
+        <el-icon><Plus /></el-icon
       ></el-button>
     </div>
     <ul>
@@ -27,17 +28,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 let searchValue = ref('')
 let booklist = [
   { id: '01', name: '新建笔记' },
   { id: '02', name: '全部笔记' }
 ]
 // 响应式变量来跟踪选中的图标索引
-const selectedIndex = ref(0)
+const selectedIndex = reactive(0)
 // 选择图标的函数
 const selectIcon = (index) => {
   selectedIndex.value = index
+}
+const searchBookList = () => {
+  booklist = booklist.filters((item) => {
+    return item.name.includes(searchValue.value)
+  })
+  console.log(booklist)
 }
 </script>
 <style>
