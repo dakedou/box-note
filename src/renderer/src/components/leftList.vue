@@ -86,11 +86,11 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed, nextTick, defineEmits } from 'vue'
+import { reactive, ref, computed, watch, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { v4 as uuidv4 } from 'uuid'
 import { useStore } from '../store/index'
-const emit = defineEmits(['focus-input'])
+
 const store = useStore()
 
 //获取menu菜单选中的数据
@@ -111,7 +111,7 @@ let isShowInput = ref(false)
 const selectListIcon = (id) => {
   store.setListSelectIndex(id)
   listSelectIndex.value = store.listSelectIndex
-  // console.log('listSelectIndex.value', listSelectIndex.value)
+
   store.listBooks.forEach((item) => {
     if (item.id === id) {
       let params = { id: '', name: '', listName: item.name }
@@ -129,7 +129,7 @@ const selectNote = (id) => {
 
 // 计算属性：过滤后的书籍列表
 const filteredBookList = computed(() => {
-  return booklist.filter((item) => {
+  return store.listBooks.filter((item) => {
     return item.name.includes(searchValue.value)
   })
 })
@@ -146,23 +146,14 @@ const sortedBookList = computed(() => {
 })
 
 // 引用输入框
-const addBookInput = ref(null)
-const addBook = () => {
-  if (store.selectedIndex === 0) {
-    isShowInput.value = true
-    nextTick(() => {
-      addBookInput.value.focus()
-    })
-  } else if (store.selectedIndex === 1) {
-    //如果是便签列表清空mainText里的input
-    store.setNotepaper({ id: '', name: '' })
 
-    emit('focus-input')
-  }
+const addBook = () => {
+  isShowInput.value = true
 }
 
 const addBookEvent = () => {
-  store.listBooks.unshift({ id: uuidv4(), name: addBookValue.value })
+  const b = { id: uuidv4(), name: addBookValue.value }
+  store.setListBooks(b)
 
   addBookValue.value = ''
   isShowInput.value = false
@@ -181,7 +172,19 @@ const deleteBook = (index) => {
 const deleteNote = (index) => {
   store.noteBook = store.noteBook.filter((note) => note.id !== index)
 }
-//判断当前选中的笔记本给notepaper笔记内容添加listName
+//根据store.listSelectIndex变得修改listSelectIndex
+watch(
+  () => store.listSelectIndex,
+  (newValue) => {
+    listSelectIndex.value = newValue
+  }
+)
+
+//读取数据
+
+onMounted(() => {
+  store.loadBookList()
+})
 </script>
 <style>
 .main-left-list {

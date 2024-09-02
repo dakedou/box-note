@@ -19,7 +19,9 @@ if (process.contextIsolated) {
             ipcRenderer.send(channel, data)
           }
         }
-      }
+      },
+      saveJson: (data) => ipcRenderer.invoke('save-json', data),
+      readJson: () => ipcRenderer.invoke('read-json')
     })
     contextBridge.exposeInMainWorld('api', api)
   } catch (error) {

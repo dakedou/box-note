@@ -46,7 +46,6 @@ const selectIcon = (ico) => {
   selectedIndex.value = ico.id
   store.setSelectedIndex(ico.id)
   if (selectedIndex.value === 'pcc01') {
-    console.log('morem')
     store.setListSelectIndex('morenbijiben')
   }
 

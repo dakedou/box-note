@@ -2,7 +2,8 @@ import { app, shell, BrowserWindow, ipcMain, globalShortcut } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-
+const fs = require('fs')
+const path = require('path')
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -85,5 +86,33 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
+  }
+})
+//存放json数据
+ipcMain.handle('save-json', async (event, data) => {
+  const dir = 'D:/boxNote' // 目标文件夹
+  const filePath = path.join(dir, 'data.json') // 文件路径
+
+  // 确保文件夹存在
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true })
+  }
+
+  // 写入 JSON 数据
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8')
+  console.log('JSON 数据已保存到', filePath)
+})
+
+// 处理读取 JSON 文件的请求
+ipcMain.handle('read-json', async () => {
+  const filePath = 'D:/boxNote/data.json' // JSON 文件路径
+
+  try {
+    const data = fs.readFileSync(filePath, 'utf-8') // 读取文件
+    const jsonData = JSON.parse(data) // 解析 JSON 数据
+    return jsonData // 返回 bookList 数据
+  } catch (error) {
+    console.error('读取 JSON 文件时出错:', error)
+    throw error // 抛出错误以便在渲染进程中处理
   }
 })

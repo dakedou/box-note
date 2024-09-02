@@ -2,7 +2,6 @@
   <div class="main-text">
     <div class="title-box">
       <el-input
-        ref="inputRef"
         v-model="param.name"
         class="no-border"
         maxlength="20"
@@ -36,7 +35,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount, watch, defineExpose } from 'vue'
+import { reactive, onMounted, onBeforeUnmount, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useStore } from '../store/index'
 import { v4 as uuidv4 } from 'uuid'
@@ -131,13 +130,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
-
-// 提供一个方法给父组件调用，以设置焦点
-const inputRef = ref(null)
-const focusInput = () => {
-  inputRef.value?.focus()
-}
-defineExpose({ focusInput })
 </script>
 
 <style>
