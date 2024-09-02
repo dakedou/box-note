@@ -23,15 +23,16 @@
         class="input-with-add"
         clearable
         @change="addBookEvent"
+        ref="addBookInput"
       >
       </el-input>
       <li
         v-for="(item, index) in sortedBookList"
         :key="index"
-        :style="{ background: selectedIndex === index ? '#c4c4c4' : '#ececea' }"
-        @click="selectIcon(index)"
+        :style="{ background: listSelectIndex === item.id ? '#c4c4c4' : '#ececea' }"
+        @click="selectIcon(item.id)"
       >
-        <span class="item-left"> {{ item.name }}</span>
+        <span class="item-left ellipsis"> {{ item.name }}</span>
         <span class="item-right">
           <el-popconfirm
             title="确定要删除这个笔记本吗?删除后不可恢复；本子下的旧笔记将转移到默认笔记本中；"
@@ -47,14 +48,35 @@
         </span>
       </li>
     </ul>
-    <ul>
-      <li v-for="item in bookName" :key="item.id">{{ item.name }}</li>
+    <ul v-else>
+      <li
+        v-for="item in filteredBookName"
+        :key="item.id"
+        :style="{ background: noteNameSelectIndex === item.id ? '#c4c4c4' : '#ececea' }"
+        @click="selectNote(item.id)"
+      >
+        <span class="item-left ellipsis"> {{ item.name }}</span>
+        <span class="item-right">
+          <el-popconfirm
+            title="确定要删除这条笔记吗?删除后不可恢复；"
+            @confirm="deleteNote(item.id)"
+            confirm-button-text="删除"
+            cancel-button-text="取消"
+            width="200"
+          >
+            <template #reference>
+              <el-icon color="#999"><RemoveFilled /></el-icon>
+            </template>
+          </el-popconfirm>
+        </span>
+      </li>
     </ul>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed, nextTick } from 'vue'
+import { ElMessage } from 'element-plus'
 import { v4 as uuidv4 } from 'uuid'
 import { useStore } from '../store/index'
 
@@ -66,40 +88,42 @@ const menuDataIndex = computed(() => {
 })
 
 let searchValue = ref('')
-let booklist = reactive([
-  { id: uuidv4(), name: '默认笔记本' },
-  { id: uuidv4(), name: '全部笔记' }
-])
-
-let bookName = reactive([
-  {
-    id: uuidv4(),
-    name: '11111111111'
-  },
-  {
-    id: uuidv4(),
-    name: '2222222222'
-  },
-  {
-    id: uuidv4(),
-    name: '3333333333'
-  }
-])
+let booklist = reactive(store.listBooks)
 
 let addBookValue = ref('')
 // 响应式变量来跟踪选中的图标索引
-const selectedIndex = ref(0)
+const listSelectIndex = ref('morenbijiben')
 
 let isShowInput = ref(false)
 
 // 选择图标的函数
-const selectIcon = (index) => {
-  selectedIndex.value = index
+const selectIcon = (id) => {
+  listSelectIndex.value = id
+  store.setListSelectIndex(id)
+  store.listBooks.forEach((item) => {
+    if (item.id === id) {
+      let params = { id: '', name: '', listName: item.name }
+      store.setNotepaper(params) //清空便签
+    }
+  })
 }
+
+//选择笔记后的状态
+let noteNameSelectIndex = ref('')
+const selectNote = (id) => {
+  noteNameSelectIndex.value = id
+  store.setNoteNameSelectIndex(id)
+}
+
 // 计算属性：过滤后的书籍列表
 const filteredBookList = computed(() => {
   return booklist.filter((item) => {
     return item.name.includes(searchValue.value)
+  })
+})
+const filteredBookName = computed(() => {
+  return store.noteBook.filter((item) => {
+    return item.name.includes(searchValue.value) // 修正这里
   })
 })
 // 计算属性：排序后的书籍列表
@@ -108,17 +132,37 @@ const sortedBookList = computed(() => {
   const otherBooks = filteredBookList.value.filter((item) => item.name !== '默认笔记本')
   return defaultBook ? [defaultBook, ...otherBooks] : otherBooks
 })
+
+// 引用输入框
+const addBookInput = ref(null)
 const addBook = () => {
-  isShowInput.value = true
+  if (store.selectedIndex === 0) {
+    isShowInput.value = true
+    nextTick(() => {
+      addBookInput.value.focus()
+    })
+  }
 }
 
 const addBookEvent = () => {
-  booklist.unshift({ id: uuidv4(), name: addBookValue.value })
+  store.listBooks.unshift({ id: uuidv4(), name: addBookValue.value })
+
   addBookValue.value = ''
   isShowInput.value = false
 }
 const deleteBook = (index) => {
-  booklist.splice(index, 1)
+  const bookToDelete = store.listBooks[index]
+  if (bookToDelete.name === '默认笔记本') {
+    ElMessage({
+      message: '默认笔记本不能被删除',
+      type: 'warning'
+    })
+    return // 直接返回，不执行删除
+  }
+  store.listBooks.splice(index, 1)
+}
+const deleteNote = (index) => {
+  store.noteBook = store.noteBook.filter((note) => note.id !== index)
 }
 </script>
 <style>

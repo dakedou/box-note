@@ -17,6 +17,9 @@ nsis:
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+  oneClick: false # 设置为 false 以允许自定义安装路径
+  perMachine: true # 允许系统范围安装
+  allowToChangeInstallationDirectory: true # 允许用户更改安装目录
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
@@ -40,3 +43,5 @@ npmRebuild: false
 publish:
   provider: generic
   url: https://example.com/auto-updates
+electronDownload:
+  mirror: https://npmmirror.com/mirrors/electron/

@@ -5,7 +5,7 @@
         v-for="(ico, index) in iconList"
         :key="index"
         :style="{ color: selectedIndex === index ? '#05c160' : '#979797' }"
-        @click="selectIcon(index)"
+        @click="selectIcon(ico, index)"
       >
         <el-popover
           placement="right"
@@ -35,10 +35,26 @@ let iconList = [
 ]
 // 响应式变量来跟踪选中的图标索引
 const selectedIndex = ref(0)
+setTimeout(() => {
+  console.log('ssssssssss', store.noteBook[0])
+
+  //判断store.noteBook中有没有数据如果有提取出id
+  if (store.noteBook.length > 0) {
+    // store.notepaper({ listName: store.noteBook })
+  }
+}, 1000)
+
 // 选择图标的函数
-const selectIcon = (index) => {
+const selectIcon = (ico, index) => {
   selectedIndex.value = index
   store.setSelectedIndex(index)
+
+  //判断store.noteBook中有没有数据如果有提取出id
+  if (store.noteBook.length > 0) {
+    store.setNoteNameSelectIndex(store.noteBook[0].id)
+  } else {
+    store.setNoteNameSelectIndex('')
+  }
 }
 </script>
 

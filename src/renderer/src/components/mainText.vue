@@ -2,7 +2,7 @@
   <div class="main-text">
     <div class="title-box">
       <el-input
-        v-model="param.title"
+        v-model="param.name"
         class="no-border"
         maxlength="20"
         placeholder="标题"
@@ -12,7 +12,14 @@
         clearable
       />
     </div>
-
+    <div class="menu-box-tag">
+      <div class="tag">
+        <el-tag effect="light"> {{ param.listName }} </el-tag>
+      </div>
+      <div class="save-button">
+        <el-button type="success" alt="或者Ctrl + S" @click="saveEvent">保存</el-button>
+      </div>
+    </div>
     <div class="main-box">
       <el-input
         v-model="param.textarea"
@@ -24,18 +31,20 @@
         resize="none"
       />
     </div>
-    <div class="save-button">
-      <el-button type="success" alt="或者Ctrl + S" @click="saveEvent">保存</el-button>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, onMounted, onBeforeUnmount } from 'vue'
+import { reactive, onMounted, onBeforeUnmount, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useStore } from '../store/index'
+import { v4 as uuidv4 } from 'uuid'
+
+const store = useStore()
 
 let param = reactive({
-  title: '',
+  id: '',
+  name: '',
   textarea: ''
 })
 
@@ -43,24 +52,29 @@ const saveEvent = (event) => {
   // 阻止默认的保存行为
   event.preventDefault()
 
-  if (param.title == '') {
+  if (param.name == '') {
     ElMessage({
       message: '标题不能为空',
       type: 'error'
     })
     return
-  } else if (param.textarea == '') {
-    ElMessage({
-      message: '内容不能为空',
-      type: 'error'
-    })
-  } else {
+  }
+  // else if (param.textarea == '') {
+  //   ElMessage({
+  //     message: '内容不能为空',
+  //     type: 'error'
+  //   })
+  // }
+  else {
+    param.id = uuidv4()
+
     ElMessage({
       message: '保存成功',
       type: 'success'
     })
   }
-  console.log(param)
+
+  store.setNoteBook({ id: param.id, listId: store.listSelectIndex, ...param })
 }
 const handleKeydown = (event) => {
   // 检查是否按下 Ctrl + S
@@ -68,6 +82,36 @@ const handleKeydown = (event) => {
     saveEvent(event)
   }
 }
+
+watch(
+  () => store.noteNameSelectIndex,
+  (newVal) => {
+    if (newVal) {
+      let pnk = store.noteBook.filter((item) => {
+        console.log(item)
+        return item.id.includes(newVal)
+        // 修正这里
+      })
+      // 直接修改 param 的属性，而不是替换 param 的引用
+      param.id = pnk[0].id
+      param.name = pnk[0].name
+      param.listName = pnk[0].listName
+      param.textarea = pnk[0].textarea
+    }
+  }
+)
+watch(
+  () => store.notepaper,
+  (newVal) => {
+    if (newVal) {
+      param.id = uuidv4()
+      param.name = ''
+      param.listName = store.notepaper.listName
+      param.textarea = ''
+    }
+  }
+)
+
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
 })
@@ -89,7 +133,7 @@ onBeforeUnmount(() => {
 }
 
 .main-text .title-box {
-  padding: 10px 10px 0 10px;
+  padding: 10px 0 0 0px;
   background-color: #fff;
 }
 .main-text .title-box .no-border {
@@ -97,17 +141,20 @@ onBeforeUnmount(() => {
   box-shadow: none;
   outline: none !important;
   width: 100%;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #eee;
   font-size: 16px;
-  color: #111;
 }
 .main-text .title-box .no-border .el-input__wrapper {
   border: none !important;
   box-shadow: none !important;
   outline: none !important;
   background-color: transparent;
+  padding-left: 25px;
 }
-
+.main-text .title-box .no-border .el-input__wrapper .el-input__inner {
+  font-weight: 700;
+  color: #111;
+}
 .main-text .main-box {
   background-color: #fff;
   overflow-y: auto;
@@ -119,7 +166,7 @@ onBeforeUnmount(() => {
   box-shadow: none;
   outline: none !important;
   width: 100%;
-  height: calc(100vh - 110px);
+  height: calc(100vh - 140px);
   font-size: 14px;
   color: #111;
   display: flex;
@@ -130,9 +177,23 @@ onBeforeUnmount(() => {
   flex: 1; /* 使 textarea 填满父级容器 */
 }
 
-.main-text .save-button {
-  position: fixed;
-  bottom: 8px;
-  right: 80px;
+.menu-box-tag {
+  background-color: rgb(245, 245, 245);
+  width: 90%;
+  height: 30px;
+  /* display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 10px;
+  box-sizing: border-box; */
+  border-bottom: 1px solid #eee;
+}
+.menu-box-tag .save-button {
+  float: right;
+}
+
+.menu-box-tag .tag {
+  padding-left: 25px;
+  display: inline-block;
 }
 </style>
