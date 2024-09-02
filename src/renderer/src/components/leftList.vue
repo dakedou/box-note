@@ -42,7 +42,7 @@
         <span class="item-right">
           <el-popconfirm
             title="确定要删除这个笔记本吗?删除后不可恢复；本子下的旧笔记将转移到默认笔记本中；"
-            @confirm="deleteBook(index)"
+            @confirm="deleteBook(item)"
             confirm-button-text="删除"
             cancel-button-text="取消"
             width="320"
@@ -158,16 +158,15 @@ const addBookEvent = () => {
   addBookValue.value = ''
   isShowInput.value = false
 }
-const deleteBook = (index) => {
-  const bookToDelete = store.listBooks[index]
-  if (bookToDelete.name === '默认笔记本') {
+const deleteBook = (el) => {
+  if (el.name === '默认笔记本') {
     ElMessage({
       message: '默认笔记本不能被删除',
       type: 'warning'
     })
     return // 直接返回，不执行删除
   }
-  store.listBooks.splice(index, 1)
+  store.deleteListBooks(el.id)
 }
 const deleteNote = (index) => {
   store.noteBook = store.noteBook.filter((note) => note.id !== index)
@@ -184,6 +183,7 @@ watch(
 
 onMounted(() => {
   store.loadBookList()
+  store.loadNoteList()
 })
 </script>
 <style>

@@ -20,8 +20,10 @@ if (process.contextIsolated) {
           }
         }
       },
-      saveJson: (data) => ipcRenderer.invoke('save-json', data),
-      readJson: () => ipcRenderer.invoke('read-json')
+      booksnamesaveJson: (data) => ipcRenderer.invoke('booksname-save-json', data),
+      booksnamereadJson: () => ipcRenderer.invoke('booksname-read-json'),
+      notesnamesaveJson: (data) => ipcRenderer.invoke('notesname-save-json', data),
+      notesnamereadJson: () => ipcRenderer.invoke('notesname-read-json')
     })
     contextBridge.exposeInMainWorld('api', api)
   } catch (error) {

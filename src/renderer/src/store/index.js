@@ -31,38 +31,57 @@ export const useStore = defineStore('main', {
     setListBooks(listBooks) {
       if (Array.isArray(listBooks)) {
         this.listBooks = listBooks
-        console.log('笔记本列表arr', this.listBooks)
       } else if (typeof listBooks === 'object' && listBooks !== null) {
         this.listBooks.unshift(listBooks)
-        console.log('笔记本列表obj', this.listBooks)
-        window.electron.saveJson({ bookList: JSON.stringify(this.listBooks) })
+        //给本地文件添加笔记本
+        window.electron.booksnamesaveJson({ bookList: JSON.stringify(this.listBooks) })
       }
     },
     async loadBookList() {
       //读取笔记本列表
       try {
-        const data = await window.electron.readJson() // 调用读取 JSON 的方法
-
+        const data = await window.electron.booksnamereadJson() // 调用读取 JSON 的方法
         console.log('读取笔记本列表：：：：：：：：：：：', JSON.parse(data.bookList))
         this.setListBooks(JSON.parse(data.bookList))
       } catch (error) {
         console.error('读取 JSON 文件时出错:', error)
       }
     },
+    deleteListBooks(id) {
+      this.listBooks = this.listBooks.filter((item) => item.id !== id)
+      window.electron.booksnamesaveJson({ bookList: JSON.stringify(this.listBooks) })
+    },
     setNoteNameSelectIndex(index) {
       this.noteNameSelectIndex = index
     },
     setNoteBook(noteBook) {
-      this.noteBook.unshift(noteBook)
       //添加笔记
-      // console.log('添加笔记', this.noteBook)
-      // window.electron.saveJson({ a: JSON.stringify(this.noteBook) })
+
+      if (Array.isArray(noteBook)) {
+        console.log('888888888')
+        this.noteBook = noteBook
+      } else if (typeof noteBook === 'object' && noteBook !== null) {
+        console.log('lllllllllllll')
+        this.noteBook.unshift(noteBook)
+        //给本地文件添加笔记本
+        window.electron.notesnamesaveJson({ noteBookList: JSON.stringify(this.noteBook) })
+      }
+    },
+    async loadNoteList() {
+      //读取笔记列表
+      try {
+        const data = await window.electron.notesnamereadJson() // 调用读取 JSON 的方法
+        console.log('读取笔记列表：：：：：：：：：：：', JSON.parse(data.noteBookList))
+        this.noteBook = JSON.parse(data.noteBookList)
+      } catch (error) {
+        console.error('读取 JSON 文件时出错:', error)
+      }
     },
     setNotepaper(note) {
       // console.log('笔记本里记载着', note)
       this.notepaper = note
-      console.log({ name: this.note })
-      window.electron.saveJson({ name: this.note })
+      // console.log({ name: this.note })
+      // window.electron.saveJson({ name: this.note })
     }
   }
 })
