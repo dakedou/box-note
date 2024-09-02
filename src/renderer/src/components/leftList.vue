@@ -10,11 +10,17 @@
         clearable
       >
       </el-input>
-      <el-button type="success" size="default" class="add-btn" @click="addBook">
+      <el-button
+        v-if="menuDataIndex === 'pcc01'"
+        type="success"
+        size="default"
+        class="add-btn"
+        @click="addBook"
+      >
         <el-icon><Plus /></el-icon
       ></el-button>
     </div>
-    <ul v-if="menuDataIndex === 0">
+    <ul v-if="menuDataIndex === 'pcc01'">
       <el-input
         v-if="isShowInput"
         v-model.trim="addBookValue"
@@ -23,16 +29,16 @@
         class="input-with-add"
         clearable
         @change="addBookEvent"
-        ref="addBookInput"
       >
       </el-input>
       <li
         v-for="(item, index) in sortedBookList"
         :key="index"
-        :style="{ background: listSelectIndex === item.id ? '#c4c4c4' : '#ececea' }"
-        @click="selectIcon(item.id)"
+        :style="{ background: listSelectIndex == item.id ? '#c4c4c4' : '#ececea' }"
+        @click="selectListIcon(item.id)"
       >
-        <span class="item-left ellipsis"> {{ item.name }}</span>
+        <span class="item-left"> {{ item.name }}</span>
+        <!-- ellipsis -->
         <span class="item-right">
           <el-popconfirm
             title="确定要删除这个笔记本吗?删除后不可恢复；本子下的旧笔记将转移到默认笔记本中；"
@@ -49,37 +55,42 @@
       </li>
     </ul>
     <ul v-else>
-      <li
-        v-for="item in filteredBookName"
-        :key="item.id"
-        :style="{ background: noteNameSelectIndex === item.id ? '#c4c4c4' : '#ececea' }"
-        @click="selectNote(item.id)"
-      >
-        <span class="item-left ellipsis"> {{ item.name }}</span>
-        <span class="item-right">
-          <el-popconfirm
-            title="确定要删除这条笔记吗?删除后不可恢复；"
-            @confirm="deleteNote(item.id)"
-            confirm-button-text="删除"
-            cancel-button-text="取消"
-            width="200"
-          >
-            <template #reference>
-              <el-icon color="#999"><RemoveFilled /></el-icon>
-            </template>
-          </el-popconfirm>
-        </span>
-      </li>
+      <template v-if="filteredBookName.length">
+        <li
+          v-for="item in filteredBookName"
+          :key="item.id"
+          :style="{ background: noteNameSelectIndex === item.id ? '#c4c4c4' : '#ececea' }"
+          @click="selectNote(item.id)"
+        >
+          <span class="item-left ellipsis"> {{ item.name }}</span>
+          <span class="item-right">
+            <el-popconfirm
+              title="确定要删除这条笔记吗?删除后不可恢复；"
+              @confirm="deleteNote(item.id)"
+              confirm-button-text="删除"
+              cancel-button-text="取消"
+              width="200"
+            >
+              <template #reference>
+                <el-icon color="#999"><RemoveFilled /></el-icon>
+              </template>
+            </el-popconfirm>
+          </span>
+        </li>
+      </template>
+      <template v-else>
+        <div class="no-data">暂无笔记</div>
+      </template>
     </ul>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, computed, nextTick } from 'vue'
+import { reactive, ref, computed, nextTick, defineEmits } from 'vue'
 import { ElMessage } from 'element-plus'
 import { v4 as uuidv4 } from 'uuid'
 import { useStore } from '../store/index'
-
+const emit = defineEmits(['focus-input'])
 const store = useStore()
 
 //获取menu菜单选中的数据
@@ -92,14 +103,15 @@ let booklist = reactive(store.listBooks)
 
 let addBookValue = ref('')
 // 响应式变量来跟踪选中的图标索引
-const listSelectIndex = ref('morenbijiben')
+let listSelectIndex = ref(store.listSelectIndex)
 
 let isShowInput = ref(false)
 
 // 选择图标的函数
-const selectIcon = (id) => {
-  listSelectIndex.value = id
+const selectListIcon = (id) => {
   store.setListSelectIndex(id)
+  listSelectIndex.value = store.listSelectIndex
+  // console.log('listSelectIndex.value', listSelectIndex.value)
   store.listBooks.forEach((item) => {
     if (item.id === id) {
       let params = { id: '', name: '', listName: item.name }
@@ -141,6 +153,11 @@ const addBook = () => {
     nextTick(() => {
       addBookInput.value.focus()
     })
+  } else if (store.selectedIndex === 1) {
+    //如果是便签列表清空mainText里的input
+    store.setNotepaper({ id: '', name: '' })
+
+    emit('focus-input')
   }
 }
 
@@ -164,6 +181,7 @@ const deleteBook = (index) => {
 const deleteNote = (index) => {
   store.noteBook = store.noteBook.filter((note) => note.id !== index)
 }
+//判断当前选中的笔记本给notepaper笔记内容添加listName
 </script>
 <style>
 .main-left-list {
@@ -227,5 +245,11 @@ const deleteNote = (index) => {
 }
 .main-left-list .input-with-add {
   margin-bottom: 10px;
+}
+.no-data {
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+  line-height: 38px;
 }
 </style>

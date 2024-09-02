@@ -2,10 +2,10 @@
   <div class="main-left-menu">
     <ul>
       <li
-        v-for="(ico, index) in iconList"
-        :key="index"
-        :style="{ color: selectedIndex === index ? '#05c160' : '#979797' }"
-        @click="selectIcon(ico, index)"
+        v-for="ico in iconList"
+        :key="ico.id"
+        :style="{ color: selectedIndex === ico.id ? '#05c160' : '#979797' }"
+        @click="selectIcon(ico)"
       >
         <el-popover
           placement="right"
@@ -34,24 +34,25 @@ let iconList = [
   { id: 'pcc02', icon: 'Notebook', name: '全部笔记' }
 ]
 // 响应式变量来跟踪选中的图标索引
-const selectedIndex = ref(0)
-setTimeout(() => {
-  console.log('ssssssssss', store.noteBook[0])
+const selectedIndex = ref('pcc01')
 
-  //判断store.noteBook中有没有数据如果有提取出id
-  if (store.noteBook.length > 0) {
-    // store.notepaper({ listName: store.noteBook })
-  }
-}, 1000)
+if (selectedIndex.value === 1) {
+  store.setNotepaper({ listName: '默认笔记本' })
+}
 
 // 选择图标的函数
-const selectIcon = (ico, index) => {
-  selectedIndex.value = index
-  store.setSelectedIndex(index)
+const selectIcon = (ico) => {
+  console.log('Dian-menu', ico.id)
+  selectedIndex.value = ico.id
+  store.setSelectedIndex(ico.id)
+  if (selectedIndex.value === 'pcc01') {
+    console.log('morem')
+    store.setListSelectIndex('morenbijiben')
+  }
 
-  //判断store.noteBook中有没有数据如果有提取出id
   if (store.noteBook.length > 0) {
     store.setNoteNameSelectIndex(store.noteBook[0].id)
+    store.setNotepaper({ listName: '默认笔记本' })
   } else {
     store.setNoteNameSelectIndex('')
   }

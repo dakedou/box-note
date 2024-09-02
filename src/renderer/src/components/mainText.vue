@@ -2,6 +2,7 @@
   <div class="main-text">
     <div class="title-box">
       <el-input
+        ref="inputRef"
         v-model="param.name"
         class="no-border"
         maxlength="20"
@@ -35,18 +36,14 @@
 </template>
 
 <script setup>
-import { reactive, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, watch, defineExpose } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useStore } from '../store/index'
 import { v4 as uuidv4 } from 'uuid'
 
 const store = useStore()
 
-let param = reactive({
-  id: '',
-  name: '',
-  textarea: ''
-})
+let param = reactive(store.notepaper)
 
 const saveEvent = (event) => {
   // 阻止默认的保存行为
@@ -66,15 +63,31 @@ const saveEvent = (event) => {
   //   })
   // }
   else {
-    param.id = uuidv4()
+    if (!param.id) {
+      param.id = uuidv4()
+    }
 
     ElMessage({
       message: '保存成功',
       type: 'success'
     })
   }
-
-  store.setNoteBook({ id: param.id, listId: store.listSelectIndex, ...param })
+  console.log('param', param)
+  //判断store.noteBook数组中包含param.id的元素是否存在
+  let isExist = store.noteBook.some((item) => {
+    return item.id === param.id
+  })
+  if (isExist) {
+    store.noteBook.forEach((item) => {
+      if (item.id === param.id) {
+        item.name = param.name
+        item.listName = param.listName
+        item.textarea = param.textarea
+      }
+    })
+  } else {
+    store.setNoteBook({ listId: store.listSelectIndex, ...param })
+  }
 }
 const handleKeydown = (event) => {
   // 检查是否按下 Ctrl + S
@@ -118,6 +131,13 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
+
+// 提供一个方法给父组件调用，以设置焦点
+const inputRef = ref(null)
+const focusInput = () => {
+  inputRef.value?.focus()
+}
+defineExpose({ focusInput })
 </script>
 
 <style>

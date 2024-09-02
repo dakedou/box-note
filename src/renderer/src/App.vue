@@ -12,8 +12,8 @@
     </div>
   </div>
   <leftMenu />
-  <leftList />
-  <maintext />
+  <leftList @focus-input="focusInputOnMain" />
+  <maintext ref="maintextComponent" />
 </template>
 
 <script setup>
@@ -34,6 +34,14 @@ const maximize = (el) => {
 }
 const close = () => {
   window.electron.ipcRenderer.send('close-window')
+}
+
+const maintextComponent = ref(null)
+const focusInputOnMain = () => {
+  // 通过 组件中的 input，并设置焦点
+  if (maintextComponent.value && maintextComponent.value.focusInput()) {
+    maintextComponent.value.focusInput()
+  }
 }
 </script>
 <style>
